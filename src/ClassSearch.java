@@ -1,5 +1,9 @@
 
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -14,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -29,33 +34,44 @@ import javafx.stage.Stage;
  */
 
 /**
- * @author sethm
+ * @author sethm an application for SQL queries. what else 
  *
  */
 public class ClassSearch extends Application {
-	private TextField keywords = new TextField(), departments = new TextField(),studentID = new TextField();
+	private TextField keywords = new TextField("Course, Instructor"), studentID = new TextField();
 	private PasswordField password = new PasswordField();
 	private Label keyLBL = new Label("Keywords"), termLBL = new Label("Term:"), depLBL = new Label("Departments:"), error = new Label();
-	private ComboBox term = new ComboBox();
+	private ComboBox term = new ComboBox(), departments = new ComboBox();
 	private String[] termList = { "Spring", "Fall", "Summer" };
+	private String[] depList = {"CPS", "MTH", "ENG", " "};
 	private String userPassword = "123", name;
-	
-
+	private Connection connection;
+	private Statement statement;
+	private boolean firstClick = true;
 	/**
 	 * @param args
+	 * @throws ClassNotFoundException 
 	 */
 
 	public void start(Stage primaryStage) {
 		// Add oracle JDBC to project
-		//Class.forName(" ");
 		
-		String url = null;
-		String sqlUserName = " ";
-		String sqlPassword = " ";
-		
-		//Create Statement object.
-		//Statement statement = connection.createStatement();
-		
+//		try {
+//		Class.forName("oracle.jdbc.driver.OracleDriver");
+//		
+//		String url = null;
+//		String sqlUserName = " ";
+//		String sqlPassword = " ";
+//		connection = DriverManager.getConnection(url, sqlUserName, sqlPassword);
+//		//Create Statement object.
+//		statement = connection.createStatement();
+//		
+//		}catch(ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+//		catch(SQLException e) {
+//			e.printStackTrace();
+//		}
 		VBox vbox = new VBox();
 		vbox.setAlignment(Pos.CENTER);
 		Button okBT = new Button("OK");
@@ -70,9 +86,17 @@ public class ClassSearch extends Application {
 		vbox.getChildren().add(okBT);
 		okBT.setOnAction(e -> {
 			if(password.getText().equals(userPassword) ) {
-				String query = "Select Fname || ' ' || Lname from student where " + studentID.getText() + " = studentID;";
-				//ResultSet resultSet = statement.executeQuery(query);
-				//name = resultSet;
+//				String query = "Select * from student";
+//				try {
+//				ResultSet resultSet = statement.executeQuery(query);
+//				while(resultSet.next()) {
+//					if(studentID.equals(resultSet.getString("studentID"))) {
+//						name = resultSet.getString("Fname");	
+//					}	 
+//				}
+//				}catch(SQLException ex) {
+//					ex.printStackTrace();
+//				}
 				primaryStage.setScene(registration(name));
 				primaryStage.setTitle(name);
 				primaryStage.show();
@@ -131,11 +155,11 @@ public class ClassSearch extends Application {
 		courses.setStyle("-fx-background-color: lightgrey;");
 		myCourses.getChildren().add(courses);
 		
-
+		//prevents user from editing things. 
 		results.setEditable(false);
 		courses.setEditable(false);
 		keywords.setEditable(false);
-		departments.setEditable(false);
+		departments.setDisable(true);
 		// Add the drop shadow effect to the pane
 		searchResults.setEffect(dropShadow);
 		searchResults.setStyle("-fx-background-color: gray;");
@@ -155,15 +179,49 @@ public class ClassSearch extends Application {
 		term.getItems().addAll(options);
 		term.setOnAction(e -> {
 			keywords.setEditable(true);
-			departments.setEditable(true);
+			departments.setDisable(false);
+		});
+		
+		keywords.setOnMouseClicked(e -> {
+			if (firstClick) {
+				keywords.clear();
+				firstClick = false;
+			}
 			
 		});
-
-		keywords.setOnKeyTyped(e -> {
-
+		ObservableList<String> depOptions = FXCollections.observableArrayList(depList);
+		departments.getItems().addAll(depOptions);
+		this.departments.setOnAction(e -> {
+			//query goes here. 
 		});
-		departments.setOnKeyTyped(e -> {
-
+		
+		search.setOnMouseClicked(e -> {
+			String key = keywords.getText();
+			if(key.toLowerCase().contains("cps")|| key.toLowerCase().contains("mth")|| key.toLowerCase().contains(" ")) {
+				courses.setText("I work");
+				
+			}else if (key.toLowerCase().contains("instructor")||key.toLowerCase().contains("professor")) {
+				//search by Instructor Name
+				courses.setText("Found teacher");
+			}else {
+				courses.setText("Sorry, please change your search criteria");
+			}
+			
+			System.out.println("button is clicked");
+		});
+		keywords.setOnKeyPressed(e -> {
+			KeyCode keyCode = e.getCode();
+			
+			if(keyCode == KeyCode.ENTER) {
+				search.fire();
+			}
+		});
+		departments.setOnKeyPressed(e -> {
+			KeyCode keyCode = e.getCode();
+			
+			if(keyCode == KeyCode.ENTER) {
+				search.fire();
+			}
 		});
 		return scene;
 		
