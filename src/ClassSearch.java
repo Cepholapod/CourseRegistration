@@ -34,7 +34,7 @@ import javafx.stage.Stage;
  */
 
 /**
- * @author sethm an application for SQL queries. what else 
+ * @author sethm an application for SQL queries. Could not get the SQL data base to work properly 
  *
  */
 public class ClassSearch extends Application {
@@ -60,8 +60,8 @@ public class ClassSearch extends Application {
 //		Class.forName("oracle.jdbc.driver.OracleDriver");
 //		
 //		String url = null;
-//		String sqlUserName = " ";
-//		String sqlPassword = " ";
+//		String sqlUserName = "glove2sm";
+//		String sqlPassword = "123";
 //		connection = DriverManager.getConnection(url, sqlUserName, sqlPassword);
 //		//Create Statement object.
 //		statement = connection.createStatement();
@@ -192,13 +192,31 @@ public class ClassSearch extends Application {
 		ObservableList<String> depOptions = FXCollections.observableArrayList(depList);
 		departments.getItems().addAll(depOptions);
 		this.departments.setOnAction(e -> {
-			//query goes here. 
+			String selectedDepartment = departments.getSelectionModel().getSelectedItem().toString();
+			String query = "select courseID, courseName\r\n"
+					+ "		from course, department \r\n"
+					+ "			where Dname = '"+ selectedDepartment  + "' AND Dnum = Dnumber;";
+//			   ResultSet rs = stmt.executeQuery(query);
+//			    while (rs.next()) {
+//			      String name = rs.getString("");
+//			      int salary = rs.getInt("SALARY");
+//			      coursaes.setText(name + " earns " + salary);
+//			    }
 		});
 		
 		search.setOnMouseClicked(e -> {
 			String key = keywords.getText();
 			if(key.toLowerCase().contains("cps")|| key.toLowerCase().contains("mth")|| key.toLowerCase().contains(" ")) {
 				courses.setText("I work");
+				String query = "select sessionID, courseID, courseName as CourseInfo" 
+				+"from course, session_" 
+					+"where"+ key +"= 'CPS 180' AND courseID = course_ID AND sessionID IN ("
+						+"select distinct sessionID from session_);";
+//				   ResultSet rs = stmt.executeQuery(query);
+//			    while (rs.next()) {
+//			      String name = rs.getString("CourseInfo");
+//			      courses.setText(CourseInfo);
+//			    }
 				
 			}else if (key.toLowerCase().contains("instructor")||key.toLowerCase().contains("professor")) {
 				//search by Instructor Name
